@@ -27,12 +27,10 @@ import ConfirmModal from '../components/modals/ConfirmModal'
  */
 export default function EditGunPage({ gun, gunId, onBack, onSuccess }) {
   const targetId = gunId || gun?.id
-
   const [loading, setLoading] = useState(true)
   const [updating, setUpdating] = useState(false)
   const [error, setError] = useState('')
   const [successMsg, setSuccessMsg] = useState('')
-
   const [formData, setFormData] = useState({
     name: '',
     type: 'Pistol',
@@ -44,7 +42,6 @@ export default function EditGunPage({ gun, gunId, onBack, onSuccess }) {
     servings: 1,
     is_featured: false,
   })
-
   const [currentImageUrl, setCurrentImageUrl] = useState('')
   const [imageFile, setImageFile] = useState(null)
   const [imagePreview, setImagePreview] = useState(null)
@@ -64,8 +61,6 @@ export default function EditGunPage({ gun, gunId, onBack, onSuccess }) {
       try {
         setLoading(true)
         setError('')
-
-        // If gun was passed directly and has full details, use it; else fetch from API
         let data = gun
         if (!data || !data.ingredients || !data.steps) {
           if (targetId && !String(targetId).startsWith('local-')) {
@@ -75,7 +70,6 @@ export default function EditGunPage({ gun, gunId, onBack, onSuccess }) {
             }
           }
         }
-
         if (data) {
           setFormData({
             name: data.name || '',
@@ -89,7 +83,6 @@ export default function EditGunPage({ gun, gunId, onBack, onSuccess }) {
             is_featured: Boolean(data.is_featured),
           })
           setCurrentImageUrl(data.image_url || data.image || '/guns/pistol.svg')
-
           if (data.ingredients && data.ingredients.length > 0) {
             setSpecs(data.ingredients.map((ing) => ({
               name: ing.name || '',
@@ -101,13 +94,11 @@ export default function EditGunPage({ gun, gunId, onBack, onSuccess }) {
               { name: 'Caliber', quantity: data.caliber || '9mm' },
             ])
           }
-
           if (data.steps && data.steps.length > 0) {
             setSteps(data.steps.map((st) => (typeof st === 'string' ? st : st.instruction || '')))
           } else {
             setSteps(['Standard manufacturer maintenance and cleaning protocol.'])
           }
-
         } else {
           setError('Hardware record could not be loaded.')
         }
@@ -166,18 +157,15 @@ export default function EditGunPage({ gun, gunId, onBack, onSuccess }) {
   const handleImageChange = (e) => {
     const file = e.target.files[0]
     if (!file) return
-
     if (file.size > 5 * 1024 * 1024) {
       setError('File size exceeds 5MB limit.')
       return
     }
-
     const allowed = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp']
     if (!allowed.includes(file.type)) {
       setError('Allowed formats: .jpg, .jpeg, .png, .webp')
       return
     }
-
     setImageFile(file)
     setImagePreview(URL.createObjectURL(file))
     setError('')
@@ -238,28 +226,23 @@ export default function EditGunPage({ gun, gunId, onBack, onSuccess }) {
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
-
     if (!formData.name.trim() || formData.name.trim().length < 3) {
       setError('Product name must be at least 3 characters.')
       return
     }
-
     const cleanSpecs = specs
       .filter((s) => s.name.trim())
       .map((s) => ({
         name: s.name.trim(),
         quantity: s.quantity.trim() || 'Standard',
       }))
-
     if (cleanSpecs.length === 0) {
       setError('Please provide at least one specification.')
       return
     }
-
     const cleanSteps = steps
       .filter((s) => s.trim())
       .map((s) => s.trim())
-
     if (cleanSteps.length === 0) {
       setError('Please provide at least one maintenance step.')
       return
@@ -367,7 +350,6 @@ export default function EditGunPage({ gun, gunId, onBack, onSuccess }) {
               <label htmlFor="edit-gun-image" className="btn btn--outline btn--sm">
                 <Upload size={14} /> Select New Image File
               </label>
-
               {imageFile && (
                 <button
                   type="button"

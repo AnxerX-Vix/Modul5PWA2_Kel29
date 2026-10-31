@@ -6,7 +6,6 @@ import { apiClient, IS_SUPABASE } from '../config/api'
 // ---------------------------------------------------------------------------
 export const normalizeProduct = (item) => {
   if (!item) return null
-
   // Resolve specifications from Supabase `specs` (text array) or API `ingredients`
   let specsList = []
   if (Array.isArray(item.specs)) {
@@ -66,30 +65,24 @@ class GunService {
   async getGuns(params = {}) {
     if (IS_SUPABASE) {
       const queryParts = ['select=*']
-
       if (params.search) {
         queryParts.push(`name=ilike.*${encodeURIComponent(params.search)}*`)
       }
-
       if (params.category && params.category !== 'All') {
         queryParts.push(`type=eq.${encodeURIComponent(params.category)}`)
       }
-
       if (params.sort_by) {
         const order = params.order === 'desc' ? 'desc' : 'asc'
         queryParts.push(`order=${encodeURIComponent(params.sort_by)}.${order}`)
       } else {
         queryParts.push('order=created_at.desc')
       }
-
       if (params.limit) {
         queryParts.push(`limit=${params.limit}`)
       }
-
       const queryString = queryParts.join('&')
       const data = await apiClient.get(`/rest/v1/products?${queryString}`)
       const list = Array.isArray(data) ? data.map(normalizeProduct) : []
-
       return {
         success: true,
         data: list,
@@ -100,7 +93,6 @@ class GunService {
         },
       }
     }
-
     // Fallback: university REST API
     const clean = Object.fromEntries(
       Object.entries(params).filter(([, v]) => v !== '' && v != null),

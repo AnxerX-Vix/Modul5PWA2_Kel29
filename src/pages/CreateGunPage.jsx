@@ -28,7 +28,6 @@ import ConfirmModal from '../components/modals/ConfirmModal'
 export default function CreateGunPage({ onBack, onSuccess }) {
   // Step state: 'upload' (upload or choose image) or 'form' (enter details)
   const [currentStep, setCurrentStep] = useState('upload')
-
   const [formData, setFormData] = useState({
     name: '',
     type: 'Pistol',
@@ -40,7 +39,6 @@ export default function CreateGunPage({ onBack, onSuccess }) {
     servings: 1,
     is_featured: false,
   })
-
   const [imageFile, setImageFile] = useState(null)
   const [imagePreview, setImagePreview] = useState(null)
   const [uploadedImageUrl, setUploadedImageUrl] = useState('')
@@ -88,11 +86,9 @@ export default function CreateGunPage({ onBack, onSuccess }) {
   // Auto-save draft every 30 seconds while in form step
   useEffect(() => {
     if (currentStep !== 'form') return
-
     const interval = setInterval(() => {
       handleSaveDraft(false)
     }, 30000)
-
     return () => clearInterval(interval)
   }, [handleSaveDraft, currentStep])
 
@@ -123,18 +119,15 @@ export default function CreateGunPage({ onBack, onSuccess }) {
   const handleImageChange = (e) => {
     const file = e.target.files[0]
     if (!file) return
-
     if (file.size > 5 * 1024 * 1024) {
       setError('File size exceeds 5MB limit.')
       return
     }
-
     const allowed = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp']
     if (!allowed.includes(file.type)) {
       setError('Allowed formats: .jpg, .jpeg, .png, .webp')
       return
     }
-
     setImageFile(file)
     setImagePreview(URL.createObjectURL(file))
     setError('')
@@ -152,7 +145,6 @@ export default function CreateGunPage({ onBack, onSuccess }) {
   // Upload image to server
   const handleUploadImage = async () => {
     if (!imageFile) {
-      // If user already previewed a preset or entered a url, advance to form
       if (uploadedImageUrl) {
         setCurrentStep('form')
         return
@@ -160,7 +152,6 @@ export default function CreateGunPage({ onBack, onSuccess }) {
       setError('Please select an image file first.')
       return
     }
-
     try {
       setUploading(true)
       setError('')
@@ -173,7 +164,6 @@ export default function CreateGunPage({ onBack, onSuccess }) {
       }
     } catch (err) {
       console.warn('Upload API failed, falling back to local preview:', err)
-      // Allow fallback to image preview so the user can continue even if MinIO bucket is unreachable
       setUploadedImageUrl(imagePreview || '/guns/pistol.svg')
       setCurrentStep('form')
     } finally {
@@ -229,28 +219,23 @@ export default function CreateGunPage({ onBack, onSuccess }) {
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
-
     if (!formData.name.trim() || formData.name.trim().length < 3) {
       setError('Product name must be at least 3 characters.')
       return
     }
-
     const cleanSpecs = specs
       .filter((s) => s.name.trim())
       .map((s) => ({
         name: s.name.trim(),
         quantity: s.quantity.trim() || 'Standard',
       }))
-
     if (cleanSpecs.length === 0) {
       setError('Please provide at least one specification.')
       return
     }
-
     const cleanSteps = steps
       .filter((s) => s.trim())
       .map((s) => s.trim())
-
     if (cleanSteps.length === 0) {
       setError('Please provide at least one maintenance / assembly step.')
       return
@@ -491,7 +476,6 @@ export default function CreateGunPage({ onBack, onSuccess }) {
                 value={formData.type}
                 onChange={(e) => {
                   handleFormChange(e)
-                  // Map category for backend schema
                   setFormData((prev) => ({
                     ...prev,
                     category: e.target.value === 'Pistol' ? 'makanan' : 'minuman',

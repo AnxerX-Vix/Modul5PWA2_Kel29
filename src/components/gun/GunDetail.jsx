@@ -9,10 +9,10 @@ import { formatPrice, averageRating } from '../../utils/helpers'
  * Full-screen product detail view.
  *
  * @param {Object}   props
- * @param {Object}   props.gun       — product data
- * @param {Function} props.onBack    — return to catalog
- * @param {Function} [props.onEdit]  — navigate to edit page
- * @param {Function} [props.onDelete]— trigger delete flow
+ * @param {Object}   props.gun       - product data
+ * @param {Function} props.onBack    - return to catalog
+ * @param {Function} [props.onEdit]  - navigate to edit page
+ * @param {Function} [props.onDelete]- trigger delete flow
  */
 export default function GunDetail({ gun, onBack, onEdit, onDelete }) {
   const imgSrc = gun.image_url || gun.image || '/guns/pistol.svg'
@@ -20,7 +20,6 @@ export default function GunDetail({ gun, onBack, onEdit, onDelete }) {
   const caliber = gun.caliber || gun.difficulty || ''
   const price = gun.price ?? gun.cook_time ?? 0
 
-  // Reviews
   const { reviews, loading: reviewsLoading, refetch: refetchReviews } = useReviews(gun.id)
   const { createReview, loading: submitting } = useCreateReview()
   const [rating, setRating] = useState(5)
@@ -59,12 +58,10 @@ export default function GunDetail({ gun, onBack, onEdit, onDelete }) {
 
   return (
     <div className="detail">
-      {/* Back button */}
       <button type="button" className="detail-back" onClick={onBack}>
         <ArrowLeft size={18} /> Back to Catalog
       </button>
 
-      {/* Hero */}
       <div className="detail-hero">
         <img className="detail-img" src={imgSrc} alt={gun.name} />
         <div className="detail-info">
@@ -74,14 +71,12 @@ export default function GunDetail({ gun, onBack, onEdit, onDelete }) {
             {caliber ? ` · ${caliber}` : ''}
           </p>
           <p className="price detail-price">{formatPrice(price)}</p>
-
           {avgRating > 0 && (
             <p className="detail-rating">
               <Star size={16} fill="var(--brass)" stroke="var(--brass)" />
               {avgRating.toFixed(1)} ({reviewCount} review{reviewCount !== 1 ? 's' : ''})
             </p>
           )}
-
           <div className="detail-actions">
             <FavoriteButton gunId={gun.id || gun.name} />
             {onEdit && (
@@ -98,13 +93,11 @@ export default function GunDetail({ gun, onBack, onEdit, onDelete }) {
         </div>
       </div>
 
-      {/* Description */}
       <section className="detail-section">
         <h2>Description</h2>
         <p>{gun.description || 'No description available.'}</p>
       </section>
 
-      {/* Specifications (from ingredients / steps if present) */}
       {gun.ingredients && gun.ingredients.length > 0 && (
         <section className="detail-section">
           <h2>Specifications</h2>
@@ -131,11 +124,8 @@ export default function GunDetail({ gun, onBack, onEdit, onDelete }) {
         </section>
       )}
 
-      {/* Reviews Section */}
       <section className="detail-section">
         <h2>Reviews</h2>
-
-        {/* Submit review */}
         <form className="review-form" onSubmit={handleSubmitReview}>
           <div className="review-stars">
             {[1, 2, 3, 4, 5].map((n) => (
@@ -154,7 +144,6 @@ export default function GunDetail({ gun, onBack, onEdit, onDelete }) {
               </button>
             ))}
           </div>
-
           <textarea
             className="review-input"
             rows="3"
@@ -163,7 +152,6 @@ export default function GunDetail({ gun, onBack, onEdit, onDelete }) {
             onChange={(e) => setComment(e.target.value)}
             maxLength={500}
           />
-
           <button
             type="submit"
             className="btn btn--primary"
@@ -175,7 +163,6 @@ export default function GunDetail({ gun, onBack, onEdit, onDelete }) {
               <><Send size={16} /> Submit Review</>
             )}
           </button>
-
           {reviewError && <p className="form-error">{reviewError}</p>}
           {reviewSuccess && <p className="form-success">{reviewSuccess}</p>}
           {!gun.id && (
@@ -185,7 +172,6 @@ export default function GunDetail({ gun, onBack, onEdit, onDelete }) {
           )}
         </form>
 
-        {/* Existing reviews */}
         {reviewsLoading ? (
           <p className="detail-loading">Loading reviews…</p>
         ) : reviews.length > 0 ? (

@@ -3,7 +3,6 @@
 // localStorage so the Favorites and Reviews APIs can associate data with
 // this browser session.  No authentication is involved.
 // ---------------------------------------------------------------------------
-
 const USER_IDENTIFIER_KEY = 'bore_barrel_user_id'
 const USER_PROFILE_KEY = 'bore_barrel_user_profile'
 

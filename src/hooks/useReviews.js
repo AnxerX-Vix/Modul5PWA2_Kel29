@@ -4,7 +4,6 @@ import reviewService from '../services/reviewService'
 // ---------------------------------------------------------------------------
 // useReviews — fetch reviews for a specific product.
 // ---------------------------------------------------------------------------
-
 export function useReviews(gunId) {
   const [reviews, setReviews] = useState([])
   const [loading, setLoading] = useState(true)
@@ -18,9 +17,7 @@ export function useReviews(gunId) {
     try {
       setLoading(true)
       setError(null)
-
       const response = await reviewService.getReviews(gunId)
-
       if (response.success) {
         setReviews(response.data || [])
       } else {
@@ -44,7 +41,6 @@ export function useReviews(gunId) {
 // ---------------------------------------------------------------------------
 // useCreateReview — submit a new review for a product.
 // ---------------------------------------------------------------------------
-
 export function useCreateReview() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
@@ -55,9 +51,7 @@ export function useCreateReview() {
       setLoading(true)
       setError(null)
       setSuccess(false)
-
       const response = await reviewService.createReview(gunId, reviewData)
-
       if (response.success) {
         setSuccess(true)
         return response.data

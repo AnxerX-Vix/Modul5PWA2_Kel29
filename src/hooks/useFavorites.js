@@ -6,7 +6,6 @@ import { getUserIdentifier } from '../services/userService'
 // localStorage fallback — used when the backend is unavailable so that
 // favourites are still fully functional offline.
 // ---------------------------------------------------------------------------
-
 const LOCAL_KEY = 'bore_barrel_favorites'
 
 const readLocalFavs = () => {
@@ -31,7 +30,6 @@ const writeLocalFavs = (ids) => {
 //
 // First attempts the server; on failure uses localStorage.
 // ---------------------------------------------------------------------------
-
 export function useFavorites() {
   const [favorites, setFavorites] = useState([])
   const [loading, setLoading] = useState(true)
@@ -43,9 +41,7 @@ export function useFavorites() {
     try {
       setLoading(true)
       setError(null)
-
       const response = await favoriteService.getFavorites(userIdentifier)
-
       if (response.success) {
         setFavorites(response.data || [])
         setIsLocal(false)
@@ -71,7 +67,6 @@ export function useFavorites() {
 // ---------------------------------------------------------------------------
 // useToggleFavorite — toggle a product in/out of favourites.
 // ---------------------------------------------------------------------------
-
 export function useToggleFavorite() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
@@ -81,12 +76,10 @@ export function useToggleFavorite() {
     try {
       setLoading(true)
       setError(null)
-
       const response = await favoriteService.toggleFavorite({
         recipe_id: gunId,
         user_identifier: userIdentifier,
       })
-
       if (response.success) {
         return response.data
       }
@@ -96,7 +89,6 @@ export function useToggleFavorite() {
       const current = readLocalFavs()
       const idx = current.findIndex((id) => String(id) === String(gunId))
       let isFavorited
-
       if (idx === -1) {
         current.push(gunId)
         isFavorited = true
@@ -117,7 +109,6 @@ export function useToggleFavorite() {
 // ---------------------------------------------------------------------------
 // useIsFavorited — convenience wrapper for a single product.
 // ---------------------------------------------------------------------------
-
 export function useIsFavorited(gunId) {
   const { favorites, loading: fetchLoading, refetch } = useFavorites()
   const { toggleFavorite: toggle, loading: toggleLoading } = useToggleFavorite()

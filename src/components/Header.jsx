@@ -21,7 +21,6 @@ function Header({ tab, onTab, onNavigateCreate }) {
         </div>
         <span className="brand display">Bore &amp; Barrel</span>
       </div>
-
       <nav className="nav">
         {NAV_ITEMS.map((item) => (
           <button
@@ -37,7 +36,6 @@ function Header({ tab, onTab, onNavigateCreate }) {
           </button>
         ))}
       </nav>
-
       {onNavigateCreate && (
         <button
           type="button"
@@ -51,5 +49,4 @@ function Header({ tab, onTab, onNavigateCreate }) {
     </header>
   )
 }
-
 export default Header

@@ -203,6 +203,7 @@ export default function Catalog({ onNavigate }) {
         onConfirm={handleDelete}
         onCancel={() => { setDeleteTarget(null); setDeleteError('') }}
       />
+
       {deleteError && (
         <div className="toast toast--error">{deleteError}</div>
       )}

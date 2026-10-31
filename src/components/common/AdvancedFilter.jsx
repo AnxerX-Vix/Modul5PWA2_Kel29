@@ -4,14 +4,14 @@ import { Search, SlidersHorizontal } from 'lucide-react'
  * Search bar + category pills + sort dropdown.
  *
  * @param {Object}   props
- * @param {string}   props.search        — current search query
- * @param {Function} props.onSearch      — (value) => void
- * @param {string[]} props.categories    — e.g. ['All','Pistol','Rifle','Shotgun']
+ * @param {string}   props.search        - current search query
+ * @param {Function} props.onSearch      - (value) => void
+ * @param {string[]} props.categories    - e.g. ['All','Pistol','Rifle','Shotgun']
  * @param {string}   props.activeCategory
- * @param {Function} props.onCategory    — (value) => void
- * @param {string}   props.sortKey       — 'name' | 'price'
- * @param {string}   props.sortOrder     — 'asc' | 'desc'
- * @param {Function} props.onSort        — ({ key, order }) => void
+ * @param {Function} props.onCategory    - (value) => void
+ * @param {string}   props.sortKey       - 'name' | 'price'
+ * @param {string}   props.sortOrder     - 'asc' | 'desc'
+ * @param {Function} props.onSort        - ({ key, order }) => void
  */
 export default function AdvancedFilter({
   search,

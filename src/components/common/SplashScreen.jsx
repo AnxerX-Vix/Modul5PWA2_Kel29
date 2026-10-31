@@ -3,15 +3,8 @@ import { ArrowRight } from 'lucide-react'
 import './SplashScreen.css'
 
 /**
- * SplashScreen — Full-bleed signature splash animation for Bore & Barrel
+ * SplashScreen - Full-bleed signature splash animation for Bore & Barrel
  * (Gunshop Asli Ngawi).
- *
- * Features:
- * - Dynamic rush & glow animation on logo
- * - Bullet trail, muzzle flash, glass crack SVG
- * - Interactive recoil/shake effect on click
- * - Auto-dismiss after 5.4s with smooth fade-out
- * - Skip / Enter Armory button
  *
  * @param {Object} props
  * @param {Function} [props.onFinish] - Callback when splash finishes / is dismissed
@@ -31,11 +24,8 @@ export default function SplashScreen({ onFinish, duration = 5400 }) {
     }, 600)
   }, [onFinish])
 
-  // Interactive recoil on tap/click
   const handleHit = (e) => {
-    // If user clicked the skip button, let that handler run instead
     if (e.target.closest('.splash-skip-btn')) return
-
     setIsHit(false)
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
@@ -44,7 +34,6 @@ export default function SplashScreen({ onFinish, duration = 5400 }) {
     })
   }
 
-  // Auto-dismiss timer
   useEffect(() => {
     const timer = setTimeout(() => {
       handleDismiss()
@@ -57,7 +46,6 @@ export default function SplashScreen({ onFinish, duration = 5400 }) {
     }
 
     window.addEventListener('keydown', handleKeyDown)
-
     return () => {
       clearTimeout(timer)
       window.removeEventListener('keydown', handleKeyDown)
@@ -73,20 +61,13 @@ export default function SplashScreen({ onFinish, duration = 5400 }) {
       aria-modal="true"
       aria-label="Bore & Barrel Intro"
     >
-      {/* Light bullet trail */}
       <div className="splash-trail" aria-hidden="true" />
-
-      {/* Muzzle flash */}
       <div className="splash-flash" aria-hidden="true" />
-
-      {/* Gunshop Asli Ngawi cropped emblem */}
       <img
         className="splash-mark"
         src="/logo.png"
         alt="Bore & Barrel Gunshop Asli Ngawi Logo"
       />
-
-      {/* Bullet impact cracks SVG */}
       <svg
         className="splash-cracks"
         viewBox="0 0 720 1280"
@@ -98,14 +79,10 @@ export default function SplashScreen({ onFinish, duration = 5400 }) {
           <path d="M-159 -92 -173 -119 -198 -133 M196 -128 214 -101 245 -88 M42 137 66 163 70 194 M-105 119 -128 144 -154 156 M230 -145 254 -164 279 -166" />
         </g>
       </svg>
-
-      {/* Brand title reveal */}
       <section className="splash-brand">
         <div className="splash-brand-name">Bore &amp; Barrel</div>
         <div className="splash-brand-sub">GUNSHOP ASLI NGAWI</div>
       </section>
-
-      {/* Skip button */}
       <button
         type="button"
         className="splash-skip-btn"
@@ -118,7 +95,6 @@ export default function SplashScreen({ onFinish, duration = 5400 }) {
         <span>Enter Armory</span>
         <ArrowRight size={14} />
       </button>
-
       <span className="splash-hint">Tap anywhere to recoil</span>
     </main>
   )

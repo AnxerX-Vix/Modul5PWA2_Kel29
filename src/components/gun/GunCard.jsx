@@ -5,10 +5,10 @@ import { formatPrice, truncate } from '../../utils/helpers'
  * Product card used in the catalog grid.
  *
  * @param {Object}   props
- * @param {Object}   props.gun       — product data
- * @param {Function} props.onSelect  — called with the gun when clicked
- * @param {Function} [props.onEdit]  — called when Edit is clicked (admin)
- * @param {Function} [props.onDelete]— called when Delete is clicked (admin)
+ * @param {Object}   props.gun       - product data
+ * @param {Function} props.onSelect  - called with the gun when clicked
+ * @param {Function} [props.onEdit]  - called when Edit is clicked (admin)
+ * @param {Function} [props.onDelete]- called when Delete is clicked (admin)
  */
 export default function GunCard({ gun, onSelect, onEdit, onDelete }) {
   const imgSrc = gun.image_url || gun.image || '/guns/pistol.svg'
@@ -32,25 +32,19 @@ export default function GunCard({ gun, onSelect, onEdit, onDelete }) {
           height="180"
           loading="lazy"
         />
-
         <span className="name display">{gun.name}</span>
-
         <span className="type">
           {category}
           {caliber ? ` · ${caliber}` : ''}
         </span>
-
         {gun.description && (
           <span className="card-desc">{truncate(gun.description, 72)}</span>
         )}
-
         <span className="price">{formatPrice(price)}</span>
       </button>
 
-      {/* Floating actions row */}
       <div className="card-actions">
         <FavoriteButton gunId={gun.id || gun.name} />
-
         {onEdit && (
           <button
             type="button"
@@ -62,7 +56,6 @@ export default function GunCard({ gun, onSelect, onEdit, onDelete }) {
             ✏️
           </button>
         )}
-
         {onDelete && (
           <button
             type="button"

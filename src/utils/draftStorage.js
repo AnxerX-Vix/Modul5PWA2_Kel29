@@ -8,7 +8,6 @@
 // Each draft is stored under  `gun_draft_<id>`  and its companion
 // timestamp under  `gun_draft_<id>_ts`.
 // ---------------------------------------------------------------------------
-
 const PREFIX = 'gun_draft_'
 const TS_SUFFIX = '_ts'
 

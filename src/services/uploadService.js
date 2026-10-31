@@ -6,7 +6,6 @@ import { BASE_URL, SUPABASE_KEY, IS_SUPABASE } from '../config/api'
 // Supports Supabase Storage (/storage/v1/object/:bucket/:file) and
 // standard REST API (/api/v1/upload), with client-side fallback.
 // ---------------------------------------------------------------------------
-
 const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp']
 const MAX_SIZE_BYTES = 5 * 1024 * 1024 // 5 MB
 
@@ -34,7 +33,6 @@ class UploadService {
       const ext = file.name.split('.').pop() || 'png'
       const fileName = `gun_${Date.now()}_${Math.random().toString(36).substring(2, 7)}.${ext}`
       const bucketName = 'guns'
-
       try {
         const uploadUrl = `${BASE_URL}/storage/v1/object/${bucketName}/${fileName}`
         await axios.post(uploadUrl, file, {
@@ -45,7 +43,6 @@ class UploadService {
           },
           timeout: 30000,
         })
-
         const publicUrl = `${BASE_URL}/storage/v1/object/public/${bucketName}/${fileName}`
         return {
           success: true,
@@ -60,7 +57,6 @@ class UploadService {
           reader.onerror = reject
           reader.readAsDataURL(file)
         })
-
         return {
           success: true,
           data: { url: dataUrl, filename: file.name },
@@ -71,12 +67,10 @@ class UploadService {
     // --- University API flow (/api/v1/upload) ---
     const formData = new FormData()
     formData.append('image', file)
-
     const response = await axios.post(`${BASE_URL}/api/v1/upload`, formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
       timeout: 30000,
     })
-
     return response.data
   }
 }

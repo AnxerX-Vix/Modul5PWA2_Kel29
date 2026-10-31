@@ -37,10 +37,8 @@ export default function FavoritesPage({ onSelectGun, onNavigateCatalog }) {
 
   // Resolve favorited products
   const favoriteItems = useMemo(() => {
-    // 1. If backend returned full objects in favorites array:
     const resolved = []
     const seen = new Set()
-
     favorites.forEach((fav) => {
       const id = fav.id || fav.recipe_id || fav.gun_id
       const match = allKnownGuns.get(id) || allKnownGuns.get(fav.name) || (fav.name ? fav : null)
@@ -58,7 +56,6 @@ export default function FavoritesPage({ onSelectGun, onNavigateCatalog }) {
         })
       }
     })
-
     return resolved
   }, [favorites, allKnownGuns])
 

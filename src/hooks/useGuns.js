@@ -8,7 +8,6 @@ import gunService from '../services/gunService'
 // When the API is unreachable the `error` string will be set and `guns`
 // will remain an empty array so the UI can show a proper error state.
 // ---------------------------------------------------------------------------
-
 export function useGuns(params = {}) {
   const [guns, setGuns] = useState([])
   const [loading, setLoading] = useState(true)
@@ -22,9 +21,7 @@ export function useGuns(params = {}) {
     try {
       setLoading(true)
       setError(null)
-
       const response = await gunService.getGuns(params)
-
       if (response.success) {
         setGuns(response.data || [])
         setPagination(response.pagination || null)
@@ -52,7 +49,6 @@ export function useGuns(params = {}) {
 //
 // Returns { gun, loading, error, refetch }.
 // ---------------------------------------------------------------------------
-
 export function useGunById(id) {
   const [gun, setGun] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -66,9 +62,7 @@ export function useGunById(id) {
     try {
       setLoading(true)
       setError(null)
-
       const response = await gunService.getGunById(id)
-
       if (response.success) {
         setGun(response.data)
       } else {

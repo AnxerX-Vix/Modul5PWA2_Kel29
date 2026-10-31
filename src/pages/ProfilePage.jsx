@@ -41,7 +41,6 @@ export default function ProfilePage({ onReplaySplash }) {
   const [avatar, setAvatar] = useState(profile.avatar || null)
   const [copied, setCopied] = useState(false)
   const [feedback, setFeedback] = useState('')
-
   const { favorites } = useFavorites()
   const [draftCount] = useState(getActiveDraftCount)
 
@@ -56,13 +55,11 @@ export default function ProfilePage({ onReplaySplash }) {
   const handleAvatarChange = (e) => {
     const file = e.target.files[0]
     if (!file) return
-
     if (file.size > 2 * 1024 * 1024) {
       setFeedback('Avatar image must be under 2MB.')
       setTimeout(() => setFeedback(''), 3000)
       return
     }
-
     const reader = new FileReader()
     reader.onload = (event) => {
       const base64 = event.target.result
@@ -141,7 +138,6 @@ export default function ProfilePage({ onReplaySplash }) {
               />
             </label>
           </div>
-
           <div className="profile-identity">
             <h2 className="display">{profile.username || 'Shooter'}</h2>
             <div className="profile-id-row">
@@ -176,7 +172,6 @@ export default function ProfilePage({ onReplaySplash }) {
       {/* Profile Form */}
       <form onSubmit={handleSaveProfile} className="profile-form">
         <h3 className="section-title">Armorer Details</h3>
-
         <div className="form-group">
           <label htmlFor="prof-name" className="form-label">
             Callsign / Operator Alias
