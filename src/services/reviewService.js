@@ -1,12 +1,12 @@
 import { apiClient, IS_SUPABASE } from '../config/api'
 
 // ---------------------------------------------------------------------------
-// ReviewService — product reviews & ratings.
-// Supports both Supabase (public.reviews) and university API (/api/v1/recipes/:id/reviews).
+// ReviewService — ulasan dan penilaian produk.
+// Mendukung Supabase (tabel public.reviews) dan API standar.
 // ---------------------------------------------------------------------------
 class ReviewService {
   /**
-   * Fetch all reviews for a given product.
+   * Ambil semua ulasan untuk produk tertentu.
    */
   async getReviews(gunId) {
     if (IS_SUPABASE) {
@@ -17,6 +17,7 @@ class ReviewService {
         ? data.map((r) => ({
             id: r.id,
             product_id: r.product_id,
+            user_id: r.user_id, // ID asli user/operator untuk cek kepemilikan
             user_identifier: r.user_id ? `Operator ${String(r.user_id).substring(0, 8)}` : 'Anonymous',
             rating: r.rating,
             comment: r.comment || '',
@@ -29,7 +30,7 @@ class ReviewService {
   }
 
   /**
-   * Submit a new review.
+   * Kirim ulasan baru.
    * @param {string|number} gunId
    * @param {Object} reviewData  { user_identifier, rating, comment }
    */
@@ -51,7 +52,7 @@ class ReviewService {
   }
 
   /**
-   * Edit an existing review.
+   * Edit ulasan yang sudah ada.
    */
   async updateReview(reviewId, reviewData) {
     if (IS_SUPABASE) {
@@ -69,7 +70,7 @@ class ReviewService {
   }
 
   /**
-   * Delete a review.
+   * Hapus ulasan.
    */
   async deleteReview(reviewId) {
     if (IS_SUPABASE) {

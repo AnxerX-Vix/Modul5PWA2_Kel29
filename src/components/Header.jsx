@@ -1,26 +1,31 @@
-import { Plus } from 'lucide-react'
+import { Plus, ShoppingCart } from 'lucide-react'
 import { useFavorites } from '../hooks/useFavorites'
+import { useCart } from '../hooks/useCart'
 
 const NAV_ITEMS = [
   { id: 'Catalog', label: 'Catalog' },
   { id: 'Favorites', label: 'Favorites', hasBadge: true },
   { id: 'Profile', label: 'Profile' },
-  { id: 'About', label: 'About' },
-  { id: 'Contact', label: 'Contact' },
 ]
 
-function Header({ tab, onTab, onNavigateCreate }) {
+function Header({ tab, onTab, onNavigateCreate, onOpenCart }) {
   const { favorites } = useFavorites()
+  const { totalCount } = useCart()
   const favCount = favorites ? favorites.length : 0
 
   return (
     <header className="header">
-      <div className="header-brand-wrap" onClick={() => onTab('Catalog')} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px' }}>
+      <div
+        className="header-brand-wrap"
+        onClick={() => onTab('Catalog')}
+        style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px' }}
+      >
         <div className="header-logo-badge">
           <img src="/logo.png" alt="Bore & Barrel" />
         </div>
         <span className="brand display">Bore &amp; Barrel</span>
       </div>
+
       <nav className="nav">
         {NAV_ITEMS.map((item) => (
           <button
@@ -36,17 +41,35 @@ function Header({ tab, onTab, onNavigateCreate }) {
           </button>
         ))}
       </nav>
-      {onNavigateCreate && (
+
+      <div className="header-right-actions" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+        {/* Tombol Keranjang Belanja */}
         <button
           type="button"
-          className="btn btn--primary btn--sm header-cta"
-          onClick={onNavigateCreate}
-          title="Register new hardware"
+          className="header-cart-btn"
+          onClick={onOpenCart}
+          title="Buka Keranjang Belanja"
+          aria-label="Keranjang belanja"
         >
-          <Plus size={15} /> Add Hardware
+          <ShoppingCart size={18} />
+          {totalCount > 0 && (
+            <span className="header-cart-badge">{totalCount}</span>
+          )}
         </button>
-      )}
+
+        {onNavigateCreate && (
+          <button
+            type="button"
+            className="btn btn--primary btn--sm header-cta"
+            onClick={onNavigateCreate}
+            title="Register new hardware"
+          >
+            <Plus size={15} /> Add Hardware
+          </button>
+        )}
+      </div>
     </header>
   )
 }
+
 export default Header

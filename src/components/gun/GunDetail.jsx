@@ -1,8 +1,11 @@
 import { useState } from 'react'
-import { ArrowLeft, Star, Send, Loader } from 'lucide-react'
+import { ArrowLeft, Star, Send, Loader, Share2, ShoppingCart, Check } from 'lucide-react'
 import FavoriteButton from '../common/FavoriteButton'
+import ReviewItem from './ReviewItem'
 import { useReviews, useCreateReview } from '../../hooks/useReviews'
+import reviewService from '../../services/reviewService'
 import { getUserIdentifier } from '../../services/userService'
+import { useCart } from '../../hooks/useCart'
 import { formatPrice, averageRating } from '../../utils/helpers'
 
 /**
@@ -22,14 +25,44 @@ export default function GunDetail({ gun, onBack, onEdit, onDelete }) {
 
   const { reviews, loading: reviewsLoading, refetch: refetchReviews } = useReviews(gun.id)
   const { createReview, loading: submitting } = useCreateReview()
+  const { addToCart } = useCart()
+
   const [rating, setRating] = useState(5)
   const [comment, setComment] = useState('')
   const [reviewError, setReviewError] = useState('')
   const [reviewSuccess, setReviewSuccess] = useState('')
+  const [toastMessage, setToastMessage] = useState('')
 
   const avgRating = gun.average_rating || averageRating(reviews)
   const reviewCount = gun.review_count ?? reviews.length
+  const currentUserId = getUserIdentifier()
 
+  // Salin link produk unik ke clipboard
+  const handleShareLink = () => {
+    const shareUrl = `${window.location.origin}?gunId=${gun.id}`
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(shareUrl)
+    } else {
+      // Fallback manual jika clipboard API tidak tersedia
+      const input = document.createElement('input')
+      input.value = shareUrl
+      document.body.appendChild(input)
+      input.select()
+      document.execCommand('copy')
+      document.body.removeChild(input)
+    }
+    setToastMessage('Link produk disalin!')
+    setTimeout(() => setToastMessage(''), 2500)
+  }
+
+  // Tambah produk ke keranjang belanja
+  const handleAddToCart = () => {
+    addToCart(gun, 1)
+    setToastMessage('Berhasil ditambahkan ke keranjang!')
+    setTimeout(() => setToastMessage(''), 2500)
+  }
+
+  // Submit ulasan baru
   const handleSubmitReview = async (e) => {
     e.preventDefault()
     setReviewError('')
@@ -41,7 +74,8 @@ export default function GunDetail({ gun, onBack, onEdit, onDelete }) {
     }
 
     const result = await createReview(gun.id, {
-      user_identifier: getUserIdentifier(),
+      user_identifier: currentUserId,
+      user_id: currentUserId,
       rating,
       comment: comment.trim(),
     })
@@ -56,14 +90,54 @@ export default function GunDetail({ gun, onBack, onEdit, onDelete }) {
     }
   }
 
+  // Edit ulasan pengguna
+  const handleUpdateReview = async (reviewId, updatedData) => {
+    try {
+      await reviewService.updateReview(reviewId, updatedData)
+      setToastMessage('Ulasan berhasil diperbarui!')
+      setTimeout(() => setToastMessage(''), 2500)
+      refetchReviews()
+    } catch (err) {
+      alert(err.message || 'Gagal memperbarui ulasan.')
+    }
+  }
+
+  // Hapus ulasan pengguna
+  const handleDeleteReview = async (reviewId) => {
+    try {
+      await reviewService.deleteReview(reviewId)
+      setToastMessage('Ulasan berhasil dihapus!')
+      setTimeout(() => setToastMessage(''), 2500)
+      refetchReviews()
+    } catch (err) {
+      alert(err.message || 'Gagal menghapus ulasan.')
+    }
+  }
+
+  // Cek apakah user yang sedang aktif adalah pemilik ulasan
+  const checkIsOwner = (rev) => {
+    if (!currentUserId) return false
+    return (
+      String(rev.user_id) === String(currentUserId) ||
+      String(rev.user_identifier) === String(currentUserId) ||
+      String(rev.user_identifier) === `Operator ${String(currentUserId).substring(0, 8)}`
+    )
+  }
+
   return (
     <div className="detail">
       <button type="button" className="detail-back" onClick={onBack}>
         <ArrowLeft size={18} /> Back to Catalog
       </button>
 
+      {toastMessage && (
+        <div className="toast toast--success" style={{ marginBottom: '16px' }}>
+          <Check size={18} /> {toastMessage}
+        </div>
+      )}
+
       <div className="detail-hero">
-        <img className="detail-img" src={imgSrc} alt={gun.name} />
+        <img className="detail-img" src={imgSrc} alt={gun.name} loading="lazy" />
         <div className="detail-info">
           <h1 className="display">{gun.name}</h1>
           <p className="type">
@@ -77,8 +151,28 @@ export default function GunDetail({ gun, onBack, onEdit, onDelete }) {
               {avgRating.toFixed(1)} ({reviewCount} review{reviewCount !== 1 ? 's' : ''})
             </p>
           )}
-          <div className="detail-actions">
+
+          <div className="detail-actions" style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center' }}>
             <FavoriteButton gunId={gun.id || gun.name} />
+
+            <button
+              type="button"
+              className="btn btn--outline"
+              onClick={handleShareLink}
+              title="Share Link Produk"
+            >
+              <Share2 size={16} /> Share Link
+            </button>
+
+            <button
+              type="button"
+              className="btn btn--primary"
+              onClick={handleAddToCart}
+              title="Tambah ke Keranjang"
+            >
+              <ShoppingCart size={16} /> + Keranjang
+            </button>
+
             {onEdit && (
               <button type="button" className="btn btn--outline" onClick={() => onEdit(gun)}>
                 Edit
@@ -177,22 +271,13 @@ export default function GunDetail({ gun, onBack, onEdit, onDelete }) {
         ) : reviews.length > 0 ? (
           <ul className="review-list">
             {reviews.map((rev) => (
-              <li key={rev.id} className="review-item">
-                <div className="review-head">
-                  <span className="review-user">{rev.user_identifier || 'Anonymous'}</span>
-                  <span className="review-stars-display">
-                    {Array.from({ length: 5 }, (_, i) => (
-                      <Star
-                        key={i}
-                        size={14}
-                        fill={i < rev.rating ? 'var(--brass)' : 'none'}
-                        stroke={i < rev.rating ? 'var(--brass)' : 'var(--line)'}
-                      />
-                    ))}
-                  </span>
-                </div>
-                {rev.comment && <p className="review-comment">{rev.comment}</p>}
-              </li>
+              <ReviewItem
+                key={rev.id}
+                review={rev}
+                isOwner={checkIsOwner(rev)}
+                onUpdateReview={handleUpdateReview}
+                onDeleteReview={handleDeleteReview}
+              />
             ))}
           </ul>
         ) : (

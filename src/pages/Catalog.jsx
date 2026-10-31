@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react'
-import { RefreshCw, Plus, Loader, AlertCircle, PackageOpen } from 'lucide-react'
+import { RefreshCw, Plus, Loader, AlertCircle, PackageOpen, Check } from 'lucide-react'
 import { useGuns } from '../hooks/useGuns'
+import { useArchivedGuns } from '../hooks/useArchivedGuns'
 import GUNS_LOCAL from '../data/guns'
 import GunCard from '../components/gun/GunCard'
 import GunDetail from '../components/gun/GunDetail'
@@ -21,12 +22,19 @@ import {
  *   1. Live API via useGuns()
  *   2. Local static array (GUNS_LOCAL) when the API is unreachable
  *
- * Features: search, category filter, sort, CRUD actions, detail modal.
+ * Features: search, category filter, sort, soft delete (arsip), CRUD actions, detail modal.
  */
 export default function Catalog({ onNavigate }) {
   // ---- API data ----
   const { guns: apiGuns, loading, error, refetch } = useGuns({ limit: 50 })
+  const { archivedIds, archive } = useArchivedGuns()
   const [useLocal, setUseLocal] = useState(false)
+  const [toastFeedback, setToastFeedback] = useState('')
+
+  const showToast = (message) => {
+    setToastFeedback(message)
+    setTimeout(() => setToastFeedback(''), 2500)
+  }
 
   // Decide data source
   const rawGuns = useMemo(() => {
@@ -43,19 +51,29 @@ export default function Catalog({ onNavigate }) {
   const [sortKey, setSortKey] = useState('name')
   const [sortOrder, setSortOrder] = useState('asc')
 
-  const categories = useMemo(() => extractCategories(rawGuns), [rawGuns])
+  // Ekstrak kategori hanya dari produk yang belum diarsipkan
+  const categories = useMemo(() => {
+    const unarchived = rawGuns.filter(
+      (g) => !archivedIds.some((archivedId) => String(archivedId) === String(g.id)),
+    )
+    return extractCategories(unarchived)
+  }, [rawGuns, archivedIds])
 
+  // Filter pencarian, kategori, dan barang yang diarsipkan
   const filteredGuns = useMemo(() => {
     let result = rawGuns.filter(
-      (g) => matchesSearch(g, search) && matchesCategory(g, activeCategory),
+      (g) =>
+        !archivedIds.some((archivedId) => String(archivedId) === String(g.id)) &&
+        matchesSearch(g, search) &&
+        matchesCategory(g, activeCategory),
     )
     return sortItems(result, sortKey, sortOrder)
-  }, [rawGuns, search, activeCategory, sortKey, sortOrder])
+  }, [rawGuns, archivedIds, search, activeCategory, sortKey, sortOrder])
 
   // ---- detail view ----
   const [selectedGun, setSelectedGun] = useState(null)
 
-  // ---- delete ----
+  // ---- delete permanen ----
   const [deleteTarget, setDeleteTarget] = useState(null)
   const [deleting, setDeleting] = useState(false)
   const [deleteError, setDeleteError] = useState('')
@@ -73,6 +91,12 @@ export default function Catalog({ onNavigate }) {
     } finally {
       setDeleting(false)
     }
+  }
+
+  // Arsipkan barang (Soft Delete)
+  const handleArchive = (gun) => {
+    archive(gun.id)
+    showToast(`"${gun.name}" berhasil diarsipkan ke Profil!`)
   }
 
   // ---- If viewing a single product detail ----
@@ -97,6 +121,12 @@ export default function Catalog({ onNavigate }) {
           with its type, caliber, and price — nothing else.
         </p>
       </section>
+
+      {toastFeedback && (
+        <div className="toast toast--success" style={{ marginBottom: '16px' }}>
+          <Check size={18} /> {toastFeedback}
+        </div>
+      )}
 
       <section>
         <div className="list-head">
@@ -173,6 +203,8 @@ export default function Catalog({ onNavigate }) {
                 onSelect={setSelectedGun}
                 onEdit={onNavigate ? (g) => onNavigate('Edit', g) : undefined}
                 onDelete={setDeleteTarget}
+                onArchive={handleArchive}
+                onFeedback={showToast}
               />
             ))}
           </ul>
