@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import favoriteService from '../services/favoriteService'
+import favoriteService, { clearFavoriteCache } from '../services/favoriteService'
 import { getUserIdentifier } from '../services/userService'
 
 // ---------------------------------------------------------------------------
@@ -20,6 +20,9 @@ const readLocalFavs = () => {
 const writeLocalFavs = (ids) => {
   try {
     localStorage.setItem(LOCAL_KEY, JSON.stringify(ids))
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new Event('bore_barrel_favorites_changed'))
+    }
   } catch {
     /* quota exceeded — silently fail */
   }
@@ -27,8 +30,7 @@ const writeLocalFavs = (ids) => {
 
 // ---------------------------------------------------------------------------
 // useFavorites — list all favourited product IDs.
-//
-// First attempts the server; on failure uses localStorage.
+// Dilengkapi in-flight request deduping dan event sync agar tidak spam fetch.
 // ---------------------------------------------------------------------------
 export function useFavorites() {
   const [favorites, setFavorites] = useState([])
@@ -59,6 +61,16 @@ export function useFavorites() {
 
   useEffect(() => {
     fetchFavorites()
+
+    // Dengarkan event perubahan favorit agar sinkron antar komponen tanpa spam request
+    const handleSync = () => fetchFavorites()
+    window.addEventListener('bore_barrel_favorites_changed', handleSync)
+    window.addEventListener('storage', handleSync)
+
+    return () => {
+      window.removeEventListener('bore_barrel_favorites_changed', handleSync)
+      window.removeEventListener('storage', handleSync)
+    }
   }, [fetchFavorites])
 
   return { favorites, loading, error, isLocal, refetch: fetchFavorites }
@@ -86,6 +98,7 @@ export function useToggleFavorite() {
       throw new Error(response.message)
     } catch {
       // Fallback: toggle in localStorage
+      clearFavoriteCache()
       const current = readLocalFavs()
       const idx = current.findIndex((id) => String(id) === String(gunId))
       let isFavorited

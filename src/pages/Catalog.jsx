@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react'
 import { RefreshCw, Plus, Loader, AlertCircle, PackageOpen, Check } from 'lucide-react'
 import { useGuns } from '../hooks/useGuns'
 import { useArchivedGuns } from '../hooks/useArchivedGuns'
+import { useFavorites } from '../hooks/useFavorites'
 import GUNS_LOCAL from '../data/guns'
 import GunCard from '../components/gun/GunCard'
 import GunDetail from '../components/gun/GunDetail'
@@ -23,13 +24,25 @@ import {
  *   2. Local static array (GUNS_LOCAL) when the API is unreachable
  *
  * Features: search, category filter, sort, soft delete (arsip), CRUD actions, detail modal.
+ * Mengambil status favorit di level parent untuk menghindari spam N+1 fetch di kartu produk.
  */
 export default function Catalog({ onNavigate }) {
   // ---- API data ----
   const { guns: apiGuns, loading, error, refetch } = useGuns({ limit: 50 })
   const { archivedIds, archive } = useArchivedGuns()
+  const { favorites, refetch: refetchFavorites } = useFavorites()
   const [useLocal, setUseLocal] = useState(false)
   const [toastFeedback, setToastFeedback] = useState('')
+
+  // Set ID favorit di level parent (mencegah N+1 request dari tiap FavoriteButton)
+  const favoriteIdSet = useMemo(() => {
+    const set = new Set()
+    favorites.forEach((fav) => {
+      const id = typeof fav === 'object' && fav !== null ? (fav.id ?? fav.product_id ?? fav.recipe_id) : fav
+      if (id != null) set.add(String(id))
+    })
+    return set
+  }, [favorites])
 
   const showToast = (message) => {
     setToastFeedback(message)
@@ -200,6 +213,8 @@ export default function Catalog({ onNavigate }) {
               <GunCard
                 key={gun.id || gun.name}
                 gun={gun}
+                isFavorited={favoriteIdSet.has(String(gun.id || gun.name))}
+                onToggleFavorite={refetchFavorites}
                 onSelect={setSelectedGun}
                 onEdit={onNavigate ? (g) => onNavigate('Edit', g) : undefined}
                 onDelete={setDeleteTarget}

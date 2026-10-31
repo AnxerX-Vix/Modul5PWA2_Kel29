@@ -1,5 +1,6 @@
 import { Share2, ShoppingCart, Archive } from 'lucide-react'
 import FavoriteButton from '../common/FavoriteButton'
+import LazyImage from '../common/LazyImage'
 import { useCart } from '../../hooks/useCart'
 import { formatPrice, truncate } from '../../utils/helpers'
 
@@ -7,12 +8,14 @@ import { formatPrice, truncate } from '../../utils/helpers'
  * Product card used in the catalog grid.
  *
  * @param {Object}   props
- * @param {Object}   props.gun          - product data
- * @param {Function} props.onSelect     - called with the gun when clicked
- * @param {Function} [props.onEdit]     - called when Edit is clicked
- * @param {Function} [props.onDelete]   - called when Delete is clicked
- * @param {Function} [props.onArchive]  - called when Archive is clicked
- * @param {Function} [props.onFeedback] - callback to show toast notification
+ * @param {Object}   props.gun               - product data
+ * @param {Function} props.onSelect          - called with the gun when clicked
+ * @param {Function} [props.onEdit]          - called when Edit is clicked
+ * @param {Function} [props.onDelete]        - called when Delete is clicked
+ * @param {Function} [props.onArchive]       - called when Archive is clicked
+ * @param {Function} [props.onFeedback]      - callback to show toast notification
+ * @param {boolean}  [props.isFavorited]     - status favorit dari parent (mencegah N+1 fetch)
+ * @param {Function} [props.onToggleFavorite]- callback saat favorit diubah
  */
 export default function GunCard({
   gun,
@@ -21,6 +24,8 @@ export default function GunCard({
   onDelete,
   onArchive,
   onFeedback,
+  isFavorited,
+  onToggleFavorite,
 }) {
   const { addToCart } = useCart()
   const imgSrc = gun.image_url || gun.image || '/guns/pistol.svg'
@@ -72,13 +77,13 @@ export default function GunCard({
         onClick={() => onSelect(gun)}
         aria-label={`View ${gun.name}`}
       >
-        <img
+        {/* Strict Image Lazy Loading via IntersectionObserver */}
+        <LazyImage
           className="card-img"
           src={imgSrc}
           alt={gun.name}
           width="240"
           height="180"
-          loading="lazy"
         />
         <span className="name display">{gun.name}</span>
         <span className="type">
@@ -92,7 +97,12 @@ export default function GunCard({
       </button>
 
       <div className="card-actions">
-        <FavoriteButton gunId={gun.id || gun.name} />
+        {/* FavoriteButton menggunakan status favorit dari parent jika ada */}
+        <FavoriteButton
+          gunId={gun.id || gun.name}
+          isFavorited={isFavorited}
+          onToggle={onToggleFavorite}
+        />
 
         {/* Tombol Share Link */}
         <button
